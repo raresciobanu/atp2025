@@ -12,7 +12,7 @@ struct DataSchimbareUlei {
 
 struct Marca
 {
-	char* denumire = NULL; //initializati tot timpul pointerii by default cu NULL
+	char* denumire;
 	int nrModele;
 };
 
@@ -20,13 +20,13 @@ struct Masina
 {
 	double nrKm;
 	int anFabricatie;
-	char* proprietar = NULL; //initializati tot timpul pointerii by default cu NULL
+	char* proprietar;
 
-	DataSchimbareUlei dataSchimbareUlei;
-	Marca marca;
+	struct DataSchimbareUlei dataSchimbareUlei;
+	struct Marca marca;
 };
 
-void scrieLaConsola(Masina m) {
+void scrieLaConsola(struct Masina m) {
 	printf("Nr. km = %.2lf\n", m.nrKm);
 	printf("An fabricatie = %d\n", m.anFabricatie);
 	printf("Proprietar = %s\n", m.proprietar);
@@ -41,7 +41,7 @@ void scrieLaConsola(Masina m) {
 	printf("Nr modele = %d\n", m.marca.nrModele);
 }
 
-void scrieInFisierText(FILE* file, Masina m) {
+void scrieInFisierText(FILE* file, struct Masina m) {
 	fprintf(file, "%.2lf\n", m.nrKm);
 	fprintf(file, "%d\n", m.anFabricatie);
 	fprintf(file, "%s\n", m.proprietar);
@@ -56,37 +56,37 @@ void scrieInFisierText(FILE* file, Masina m) {
 	fprintf(file, "%d\n", m.marca.nrModele);
 }
 
-void citireDinFisierText(FILE* file, Masina& m) {
-	fscanf(file, "%lf", &m.nrKm);
-	fscanf(file, "%d", &m.anFabricatie);
+void citireDinFisierText(FILE* file, struct Masina* m) {
+	fscanf(file, "%lf", &m->nrKm);
+	fscanf(file, "%d", &m->anFabricatie);
 
-	if (m.proprietar != NULL) free(m.proprietar);//evitare memory leaks
+	if (m->proprietar != NULL) free(m->proprietar);//evitare memory leaks
 
 	fgetc(file);
 
 	char aux[100];
 	fgets(aux, 100, file);
-	m.proprietar = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.proprietar, aux);
+	m->proprietar = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->proprietar, aux);
 
 	//DataSchimbareUlei
-	fscanf(file, "%d", &m.dataSchimbareUlei.zi);
-	fscanf(file, "%d", &m.dataSchimbareUlei.luna);
-	fscanf(file, "%d", &m.dataSchimbareUlei.an);
+	fscanf(file, "%d", &m->dataSchimbareUlei.zi);
+	fscanf(file, "%d", &m->dataSchimbareUlei.luna);
+	fscanf(file, "%d", &m->dataSchimbareUlei.an);
 
 	//Marca
 	fgetc(file);
 
-	if (m.marca.denumire != NULL) free(m.marca.denumire);//evitare memory leaks
+	if (m->marca.denumire != NULL) free(m->marca.denumire);//evitare memory leaks
 
 	fgets(aux, 100, file);
-	m.marca.denumire = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.marca.denumire, aux);
+	m->marca.denumire = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->marca.denumire, aux);
 
-	fscanf(file, "%d", &m.marca.nrModele);
+	fscanf(file, "%d", &m->marca.nrModele);
 }
 
-void scrieInFisBinar(FILE* file, Masina m) {
+void scrieInFisBinar(FILE* file, struct Masina m) {
 	fwrite(&m.nrKm, sizeof(m.nrKm), 1, file);
 	fwrite(&m.anFabricatie, sizeof(m.anFabricatie), 1, file);
 
@@ -105,11 +105,11 @@ void scrieInFisBinar(FILE* file, Masina m) {
 	fwrite(&m.marca.nrModele, sizeof(m.marca.nrModele), 1, file);
 }
 
-void citireDinFisBinar(FILE* file, Masina& m) {
-	fread(&m.nrKm, sizeof(m.nrKm), 1, file);
-	fread(&m.anFabricatie, sizeof(m.anFabricatie), 1, file);
+void citireDinFisBinar(FILE* file, struct Masina* m) {
+	fread(&m->nrKm, sizeof(m->nrKm), 1, file);
+	fread(&m->anFabricatie, sizeof(m->anFabricatie), 1, file);
 
-	if (m.proprietar != NULL) free(m.proprietar);//evitare memory leaks
+	if (m->proprietar != NULL) free(m->proprietar);//evitare memory leaks
 
 	int dim = 0;
 	char aux[100];
@@ -117,30 +117,30 @@ void citireDinFisBinar(FILE* file, Masina& m) {
 	fread(&dim, sizeof(dim), 1, file);
 	fread(aux, dim, 1, file);
 
-	m.proprietar = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.proprietar, aux);
+	m->proprietar = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->proprietar, aux);
 
-	fread(&m.dataSchimbareUlei.zi, sizeof(m.dataSchimbareUlei.zi), 1, file);
-	fread(&m.dataSchimbareUlei.luna, sizeof(m.dataSchimbareUlei.luna), 1, file);
-	fread(&m.dataSchimbareUlei.an, sizeof(m.dataSchimbareUlei.an), 1, file);
+	fread(&m->dataSchimbareUlei.zi, sizeof(m->dataSchimbareUlei.zi), 1, file);
+	fread(&m->dataSchimbareUlei.luna, sizeof(m->dataSchimbareUlei.luna), 1, file);
+	fread(&m->dataSchimbareUlei.an, sizeof(m->dataSchimbareUlei.an), 1, file);
 
-	if (m.marca.denumire != NULL) free(m.marca.denumire);//evitare memory leaks
+	if (m->marca.denumire != NULL) free(m->marca.denumire);//evitare memory leaks
 
 	fread(&dim, sizeof(dim), 1, file);
 	fread(aux, dim, 1, file);
 
-	m.marca.denumire = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.marca.denumire, aux);
+	m->marca.denumire = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->marca.denumire, aux);
 
-	fread(&m.marca.nrModele, sizeof(m.marca.nrModele), 1, file);
+	fread(&m->marca.nrModele, sizeof(m->marca.nrModele), 1, file);
 }
 
-void main() {
-	DataSchimbareUlei d1, d2;
+int main() {
+	struct DataSchimbareUlei d1, d2;
 	d1.zi = 22; d1.luna = 6; d1.an = 2024;
 	d2.zi = 10; d2.luna = 12; d2.an = 2024;
 
-	Marca marca1, marca2;
+	struct Marca marca1, marca2;
 	marca1.denumire = (char*)malloc(strlen("Audi") + 1);
 	strcpy(marca1.denumire, "Audi");
 	marca1.nrModele = 120;
@@ -149,7 +149,7 @@ void main() {
 	strcpy(marca2.denumire, "BMW");
 	marca2.nrModele = 170;
 
-	Masina m1, m2;
+	struct Masina m1, m2;
 
 	m1.anFabricatie = 2020;
 	m1.nrKm = 200010.993;
@@ -183,9 +183,9 @@ void main() {
 		exit(200);
 	}
 
-	Masina m3, m4;
-	citireDinFisierText(fisTxtIn, m3);
-	citireDinFisierText(fisTxtIn, m4);
+	struct Masina m3, m4;
+	citireDinFisierText(fisTxtIn, &m3);
+	citireDinFisierText(fisTxtIn, &m4);
 
 	fclose(fisTxtIn);
 
@@ -214,9 +214,9 @@ void main() {
 		exit(600);
 	}
 
-	Masina m5, m6;
-	citireDinFisBinar(fisBinIn, m5);
-	citireDinFisBinar(fisBinIn, m6);
+	struct Masina m5, m6;
+	citireDinFisBinar(fisBinIn, &m5);
+	citireDinFisBinar(fisBinIn, &m6);
 
 	fclose(fisBinIn);
 
