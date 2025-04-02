@@ -5,28 +5,28 @@
 #pragma warning (disable:4996)
 
 //fisier binar secvential
-struct student
+typedef struct
 {
 	int nrAbsente;
 	char nume[100];
 	char serie[30];
 	double medieAnPrecedent;
 	char telefon[20];
-};
+} student;
 
-void citireStudent(student& s) {
+void citireStudent(student* s) {
 	printf("\n========\n");
 
-	printf("nume = "); gets_s(s.nume, 100);
+	printf("nume = "); fgets(s->nume, 100, stdin);
 
-	printf("nrAbsente = "); scanf("%d", &s.nrAbsente);
+	printf("nrAbsente = "); scanf("%d", &s->nrAbsente);
 
-	printf("medieAnPrecedent = "); scanf("%lf", &s.medieAnPrecedent);
+	printf("medieAnPrecedent = "); scanf("%lf", &s->medieAnPrecedent);
 
 	getchar();
-	printf("serie = "); gets_s(s.serie, 30);
+	printf("serie = "); fgets(s->serie, 30, stdin);
 
-	printf("telefon = "); gets_s(s.telefon, 20);
+	printf("telefon = "); fgets(s->telefon, 20, stdin);
 
 	printf("\n========\n");
 }
@@ -43,13 +43,13 @@ void populare() {
 
 		int continuare = 1;
 		while (continuare == 1) {
-			citireStudent(s);
+			citireStudent(&s);
 
 			fwrite(&s, sizeof(student), 1, f);
 
 			printf("Doriti sa continuati?(1 - DA; 0 - NU)\n");
 			scanf("%d", &continuare);
-			getchar();//ramane \n de la citirea lui  continuare 
+			getchar();//ramane \n de la citirea lui  continuare
 		}
 
 		fclose(f);
@@ -91,7 +91,7 @@ void incrementeazaMedieStudent() {
 	else {
 		char numeStudent[100];
 
-		printf("nume student = "); gets_s(numeStudent, 100);
+		printf("nume student = "); fgets(numeStudent, 100, stdin);
 
 		student s;
 		int pozitie = 0;
@@ -134,7 +134,7 @@ void raportRestantieri() {
 		fclose(fisBin);
 	}
 }
-void main() {
+int main() {
 
 	printf("\n\n==populare==\n\n");
 	populare();
@@ -150,4 +150,6 @@ void main() {
 
 	printf("\n\n==raportRestantieri==\n\n");
 	raportRestantieri();
+
+	return 0;
 }

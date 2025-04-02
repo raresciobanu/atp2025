@@ -16,7 +16,7 @@ enum CULORI
 // int * const --> var pointer este constanta (nu poti altera adresa catre care pointeaza pointerul).
 // const int * const -> un pointer constant ce pointeaza catre o zona de memorie constanta
 
-const char* transformaEnumInSirDeCaractere(CULORI culoare) {
+const char* transformaEnumInSirDeCaractere(enum CULORI culoare) {
 	switch (culoare)
 	{
 	case ALB:
@@ -32,7 +32,7 @@ const char* transformaEnumInSirDeCaractere(CULORI culoare) {
 	}
 }
 
-CULORI transformaSirDeCaractereInEnum(const char* pointerSir) {
+enum CULORI transformaSirDeCaractereInEnum(const char* pointerSir) {
 	if (strcmp(pointerSir, "alb") == 0) {
 		return ALB;
 	}
@@ -63,42 +63,42 @@ union user {
 //129bytes
 struct telefon
 {
-	CULORI culoareTelefon;//4bytes
-	char* marca = NULL;//8bytes
+	enum CULORI culoareTelefon;//4bytes
+	char* marca;//8bytes
 	double pret;//8bytes
 	int anFabricatie;//4bytes
 	char version;//1byte
-	client proprietar;//104bytes
+	struct client proprietar;//104bytes
 };
 
-void scrieClientLaConsola(client c) {
+void scrieClientLaConsola(struct client c) {
 	printf("varsta = %d\n", c.varsta);
 
 	printf("nume = %s\n\n", c.nume);
 }
 
-void citesteClientDeLaConsola(client& c) {
+void citesteClientDeLaConsola(struct client* c) {
 	printf("varsta = ");
-	scanf("%d", &c.varsta);
+	scanf("%d", &c->varsta);
 
 
 	printf("client = ");
 	getchar();// folosit pt a elibera bufferul
-	gets_s(c.nume);
+	fgets(c->nume, 99, stdin);
 	//scanf("%s", c.nume); //scanf citeste pana la primul spatiu
 }
 
-void scrieClientInFisier(FILE* fisier, client c) {
+void scrieClientInFisier(FILE* fisier, struct client c) {
 	fprintf(fisier, "%d\n", c.varsta);
 	fprintf(fisier, "%s\n", c.nume);
 }
 
-void citireClientDinFisier(FILE* fisier, client& c) {
-	fscanf(fisier, "%d\n", &c.varsta);
-	fgets(c.nume, 100, fisier);
+void citireClientDinFisier(FILE* fisier, struct client* c) {
+	fscanf(fisier, "%d\n", &c->varsta);
+	fgets(c->nume, 100, fisier);
 }
 
-void scrieTelefonLaConsola(telefon t) {
+void scrieTelefonLaConsola(struct telefon t) {
 	printf("culoare telefon = %s\n", transformaEnumInSirDeCaractere(t.culoareTelefon));
 
 	printf("marca = %s\n", t.marca);
@@ -112,40 +112,40 @@ void scrieTelefonLaConsola(telefon t) {
 	//printf("varsta = %d\n\n", t.proprietar.varsta);
 }
 
-void citireTelefonDeLaConsola(telefon& t) {
+void citireTelefonDeLaConsola(struct telefon* t) {
 	char aux[100];
 	printf("culoare telefon (alb / negru / verde / rosu) = ");
 	scanf("%s", aux);
 
-	t.culoareTelefon = transformaSirDeCaractereInEnum(aux);
+	t->culoareTelefon = transformaSirDeCaractereInEnum(aux);
 
 	printf("marca = ");
 	scanf("%s", aux);
 
-	if (t.marca != NULL) {
-		free(t.marca);//evitare memory leaks
+	if (t->marca != NULL) {
+		free(t->marca);//evitare memory leaks
 	}
 
-	t.marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
-	strcpy(t.marca, aux);
+	t->marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
+	strcpy(t->marca, aux);
 
 
 	printf("pret = ");
-	scanf("%lf", &t.pret);
+	scanf("%lf", &t->pret);
 
 	printf("an fabricatie = ");
-	scanf("%d", &t.anFabricatie);
+	scanf("%d", &t->anFabricatie);
 
 	printf("version = ");
-	scanf(" %c", &t.version);//daca tu introduci de la tastatura 44 (in spate inseamna 44\n)=> automat t.version=\n
+	scanf(" %c", &t->version);//daca tu introduci de la tastatura 44 (in spate inseamna 44\n)=> automat t.version=\n
 	//ca sa evitam aceasta problema (sa ignore un \n citit inainte) punem un spatiu in fata %c
 
 	//getchar();// folosit pt a elibera bufferul....cand citesti versiunea ( se citeste defapt de ex: M\n) => ramane in buffer \n
 
-	citesteClientDeLaConsola(t.proprietar);
+	citesteClientDeLaConsola(&t->proprietar);
 }
 
-void scrieTelefonInFisier(FILE* fisier, telefon t) {
+void scrieTelefonInFisier(FILE* fisier, struct telefon t) {
 	fprintf(fisier, "%s\n", transformaEnumInSirDeCaractere(t.culoareTelefon));
 
 	fprintf(fisier, "%s\n", t.marca);
@@ -156,35 +156,35 @@ void scrieTelefonInFisier(FILE* fisier, telefon t) {
 	scrieClientInFisier(fisier, t.proprietar);
 }
 
-void citireTelefonDinFisier(FILE* fisier, telefon& t) {
+void citireTelefonDinFisier(FILE* fisier, struct telefon* t) {
 	char aux[100];
 
 	fscanf(fisier, "%s", aux);
-	t.culoareTelefon = transformaSirDeCaractereInEnum(aux);
+	t->culoareTelefon = transformaSirDeCaractereInEnum(aux);
 
 	fscanf(fisier, "%s", aux);
 
-	if (t.marca != NULL) {
-		free(t.marca);//evitare memory leaks
+	if (t->marca != NULL) {
+		free(t->marca);//evitare memory leaks
 	}
 
-	t.marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
-	strcpy(t.marca, aux);
+	t->marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
+	strcpy(t->marca, aux);
 
 
-	fscanf(fisier, "%lf", &t.pret);
+	fscanf(fisier, "%lf", &t->pret);
 
-	fscanf(fisier, "%d", &t.anFabricatie);
+	fscanf(fisier, "%d", &t->anFabricatie);
 
-	fscanf(fisier, " %c", &t.version);//daca tu introduci de la tastatura 44 (in spate inseamna 44\n)=> automat t.version=\n
+	fscanf(fisier, " %c", &t->version);//daca tu introduci de la tastatura 44 (in spate inseamna 44\n)=> automat t.version=\n
 	//ca sa evitam aceasta problema (sa ignore un \n citit inainte) punem un spatiu in fata %c
 
 	//fgetc(fisier);// folosit pt a elibera bufferul....cand citesti versiunea ( se citeste defapt de ex: M\n) => ramane in buffer \n
 
-	citireClientDinFisier(fisier, t.proprietar);
+	citireClientDinFisier(fisier, &t->proprietar);
 }
 
-void scrieClientInFisierBinar(FILE* fisier, client c) {
+void scrieClientInFisierBinar(FILE* fisier, struct client c) {
 	fwrite(&c.varsta, sizeof(c.varsta), 1, fisier);
 
 	int dim = strlen(c.nume) + 1;//calculam dim numelui clientului (+1 pt \0)
@@ -196,25 +196,25 @@ void scrieClientInFisierBinar(FILE* fisier, client c) {
 	//fwrite(&c, sizeof(c), 1, fisier);
 }
 
-void citireClientDinFisierBinar(FILE* fisier, client& c) {
-	fread(&c.varsta, sizeof(c.varsta), 1, fisier);
+void citireClientDinFisierBinar(FILE* fisier, struct client* c) {
+	fread(&c->varsta, sizeof(c->varsta), 1, fisier);
 
 	int dim = 0;
 	fread(&dim, sizeof(dim), 1, fisier);
-	fread(c.nume, dim, 1, fisier);
+	fread(c->nume, dim, 1, fisier);
 
 	//alternativ putem face ca mai jos daca structura noastra nu contine pointeri
 	//dar daca scriem asa...nu suntem eficienti...blocam tot timpul 104bytes(dim clientului)
 	//fread(&c, sizeof(c), 1, fisier);
 }
 
-void scrieTelefonInFisierBinar(FILE* fisier, telefon t) {
+void scrieTelefonInFisierBinar(FILE* fisier, struct telefon t) {
 	//functia fwrite - primeste ca input ===> fwrite(addressData, sizeData, numbersData, pointerToFile);
 	//addressData - adresa variabilei citite (cu "&" in fata)
 	//sizeData - dimensiunea variabilei salvate (sizeof)
 	//numbersData - numarul de variabile salvate
 			//int arr[3] = {101, 203, 303};
-			// 
+			//
 			//fwrite(arr, sizeof(int), 2, fp); //va scrie primele 2 elemente din vector
 	//pointerToFile - fisierul unde se salveaza variabila
 
@@ -242,7 +242,7 @@ void scrieTelefonInFisierBinar(FILE* fisier, telefon t) {
 	scrieClientInFisierBinar(fisier, t.proprietar);
 }
 
-void citireTelefonDinFisierBinar(FILE* fisier, telefon& t) {
+void citireTelefonDinFisierBinar(FILE* fisier, struct telefon* t) {
 	//functia fread - primeste ca input===> fread(addressData, sizeData, numbersData, pointerToFile);
 	//descrierea parametrilor este la fel ca la fwrite
 
@@ -251,27 +251,27 @@ void citireTelefonDinFisierBinar(FILE* fisier, telefon& t) {
 	fread(&dim, sizeof(dim), 1, fisier);
 	char aux[100];
 	fread(aux, dim, 1, fisier);
-	t.culoareTelefon = transformaSirDeCaractereInEnum(aux);
+	t->culoareTelefon = transformaSirDeCaractereInEnum(aux);
 
-	if (t.marca != NULL) {
-		free(t.marca);//evitare memory leaks
+	if (t->marca != NULL) {
+		free(t->marca);//evitare memory leaks
 	}
 
 	fread(&dim, sizeof(dim), 1, fisier);
 	fread(aux, dim, 1, fisier);
-	t.marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
-	strcpy(t.marca, aux);
+	t->marca = (char*)malloc(strlen(aux) + 1);//+1 pt \0
+	strcpy(t->marca, aux);
 
-	fread(&t.pret, sizeof(t.pret), 1, fisier);
+	fread(&t->pret, sizeof(t->pret), 1, fisier);
 
-	fread(&t.anFabricatie, sizeof(t.anFabricatie), 1, fisier);
+	fread(&t->anFabricatie, sizeof(t->anFabricatie), 1, fisier);
 
-	fread(&t.version, sizeof(t.version), 1, fisier);
+	fread(&t->version, sizeof(t->version), 1, fisier);
 
-	citireClientDinFisierBinar(fisier, t.proprietar);
+	citireClientDinFisierBinar(fisier, &t->proprietar);
 }
 
-void main() {
+int main() {
 	//testare adresa vector
 	char nume[100];
 	printf("nume=%p\n", nume);
@@ -280,7 +280,7 @@ void main() {
 	printf("&nume[1]=%p\n\n\n", &nume[1]);
 
 
-	user user1;
+	union user user1;
 	user1.varsta = 20;
 	printf("varsta=%d\n", user1.varsta);
 	user1.gen = 'M';
@@ -298,7 +298,7 @@ void main() {
 	//a-adaugare informatii la sf fisierului, daca NU exista fisierul se face unul nou
 	//ab- este "a" in mod binar
 	//r+ sau rb+ - fisier deschis pentru citire si scriere/ citire si scriere in mod binar, daca fisierul nu exista se intoarce NULL la fopen()
-	//w+ sau wb+ - fisier deschis pentru citire si scriere in mod binar. 
+	//w+ sau wb+ - fisier deschis pentru citire si scriere in mod binar.
 	//a+ si ab+ - fisier deschis pentru citire si adaugare la final
 
 
@@ -308,15 +308,15 @@ void main() {
 		exit(300);
 	}
 
-	client c1;
+	struct client c1;
 	strcpy(c1.nume, "Rares");
 	c1.varsta = 20;
 
-	client c2;
+	struct client c2;
 	strcpy(c2.nume, "Ana");
 	c2.varsta = 21;
-	client c3;
-	citesteClientDeLaConsola(c3);
+	struct client c3;
+	citesteClientDeLaConsola(&c3);
 
 	printf("\n\n---scriere CLIENT la consola---\n\n");
 
@@ -339,10 +339,10 @@ void main() {
 		exit(900);
 	}
 
-	client c4, c5, c6;
-	citireClientDinFisier(fisierClientiReadMode, c4);
-	citireClientDinFisier(fisierClientiReadMode, c5);
-	citireClientDinFisier(fisierClientiReadMode, c6);
+	struct client c4, c5, c6;
+	citireClientDinFisier(fisierClientiReadMode, &c4);
+	citireClientDinFisier(fisierClientiReadMode, &c5);
+	citireClientDinFisier(fisierClientiReadMode, &c6);
 
 	//important! inchideti fisierul dupa ce terminati de lucrat in el
 	fclose(fisierClientiReadMode);
@@ -357,12 +357,12 @@ void main() {
 
 
 	printf("\n\n---citire TELEFON DE LA consola---\n\n");
-	telefon t1, t2, t3;
+	struct telefon t1, t2, t3;
 	t1.anFabricatie = 2020;
 	t2.anFabricatie = 2021;
 
-	t1.culoareTelefon = CULORI::NEGRU;
-	t2.culoareTelefon = CULORI::VERDE;
+	t1.culoareTelefon = NEGRU;
+	t2.culoareTelefon = VERDE;
 
 	t1.pret = 2000.99;
 	t2.pret = 2599.99;
@@ -388,7 +388,7 @@ void main() {
 	strcpy(t2.marca, "Huawei");
 
 
-	citireTelefonDeLaConsola(t3);
+	citireTelefonDeLaConsola(&t3);
 
 	printf("\n\n---scriere TELEFON la consola---\n\n");
 
@@ -418,10 +418,10 @@ void main() {
 		exit(2000);
 	}
 
-	telefon t4, t5, t6;
-	citireTelefonDinFisier(fisierTelefoane, t4);
-	citireTelefonDinFisier(fisierTelefoane, t5);
-	citireTelefonDinFisier(fisierTelefoane, t6);
+	struct telefon t4, t5, t6;
+	citireTelefonDinFisier(fisierTelefoane, &t4);
+	citireTelefonDinFisier(fisierTelefoane, &t5);
+	citireTelefonDinFisier(fisierTelefoane, &t6);
 
 	scrieTelefonLaConsola(t4);
 	scrieTelefonLaConsola(t5);
@@ -450,9 +450,9 @@ void main() {
 		exit(7700);
 	}
 
-	telefon t10, t11;
-	citireTelefonDinFisierBinar(fisierTelefoaneBinar, t10);
-	citireTelefonDinFisierBinar(fisierTelefoaneBinar, t11);
+	struct telefon t10, t11;
+	citireTelefonDinFisierBinar(fisierTelefoaneBinar, &t10);
+	citireTelefonDinFisierBinar(fisierTelefoaneBinar, &t11);
 
 	scrieTelefonLaConsola(t10);
 	scrieTelefonLaConsola(t11);
