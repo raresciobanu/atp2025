@@ -1,18 +1,17 @@
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
 
 #pragma warning (disable:4996)
 
 //fisier binar relativ
-struct magazin {
+typedef struct {
 	int esteSetat; //0 sau 1
 	int key;
 
 	char denumire[100];
 	double venitLunar;
 	int nrAngajati;
-};
+} magazin;
 
 int nr_art(FILE* f)
 {
@@ -39,14 +38,14 @@ magazin genereazaMagazinGol() {
 	return m;
 }
 
-void citireMagazin(magazin& m) {
-	m.esteSetat = 1;
+void citireMagazin(magazin* m) {
+	m->esteSetat = 1;
 
-	printf("nrAngajati = "); scanf("%d", &m.nrAngajati);
-	printf("venitLunar = "); scanf("%lf", &m.venitLunar);
+	printf("nrAngajati = "); scanf("%d", &m->nrAngajati);
+	printf("venitLunar = "); scanf("%lf", &m->venitLunar);
 
 	getchar();
-	printf("denumire = "); gets_s(m.denumire, 100);
+	printf("denumire = "); fgets(m->denumire, 100, stdin);
 }
 
 void populare() {
@@ -55,7 +54,7 @@ void populare() {
 	FILE* f = fopen("magazine.bin", "wb+");
 
 	int cod;
-	printf("cod="); scanf_s("%d", &cod);//reprezinta codul>=0
+	printf("cod="); scanf("%d", &cod);//reprezinta codul>=0
 	while (!feof(stdin))// se citeste pana cand introduceti CTRL+Z
 	{
 		if (cod < 0) {
@@ -78,7 +77,7 @@ void populare() {
 			magazin temp;
 			temp.key = cod;
 
-			citireMagazin(temp);
+			citireMagazin(&temp);
 
 			fwrite(&temp, sizeof(magazin), 1, f);
 		}
@@ -94,14 +93,14 @@ void populare() {
 			else {
 				fseek(f, cod * sizeof(magazin), SEEK_SET);
 
-				citireMagazin(temp);
+				citireMagazin(&temp);
 				temp.key = cod;
 
 				fwrite(&temp, sizeof(magazin), 1, f);
 			}
 		}
 
-		printf("\n\ncod="); scanf_s("%d", &cod);
+		printf("\n\ncod="); scanf("%d", &cod);
 	}
 
 	fclose(f);
@@ -133,7 +132,7 @@ void scrieInFisTextMagazineleCu5Angajati() {
 }
 
 
-void main() {
+int main() {
 	//#define SEEK_CUR    1
 	//#define SEEK_END    2
 	//#define SEEK_SET    0
@@ -144,4 +143,6 @@ void main() {
 
 	printf("\n\n==scrieInFisTextMagazineleCu5Angajati==\n\n");
 	scrieInFisTextMagazineleCu5Angajati();
+
+	return 0;
 }

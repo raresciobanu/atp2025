@@ -3,20 +3,20 @@
 #include<stdlib.h>
 
 //fisier binar secvential
-struct Data
+typedef struct
 {
 	int zi;
 	int luna;
 	int an;
-};
+} Data;
 
-struct Produs {
+typedef struct {
 	int codDeBare;
 	char denumire[50];
 	float pret;
 	int stoc;
 	Data dataExpirare;
-};
+} Produs;
 
 //obtinere total elemente de tip Produs
 int getNrProduse(FILE* f) {
@@ -31,8 +31,7 @@ int getNrProduse(FILE* f) {
 }
 
 void sortareFisierDupaDenumireSiPret(char numeFisier[20]) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "rb+");
+	FILE* f = fopen(numeFisier, "rb+");
 
 	//fct strcmp(s1,s2) - compara 2 siruri de caractere si returneaza un nr ...face parte din libraria string.h
 	//0 -> daca sirurile sunt identice
@@ -68,8 +67,7 @@ void sortareFisierDupaDenumireSiPret(char numeFisier[20]) {
 }
 
 void sortareFisierInMemorieInternaDupaDenumireSiPret(char numeFisier[20]) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "rb+");
+	FILE* f = fopen(numeFisier, "rb+");
 	if (f != NULL) {
 		int nr = getNrProduse(f);
 
@@ -101,32 +99,31 @@ void sortareFisierInMemorieInternaDupaDenumireSiPret(char numeFisier[20]) {
 	}
 }
 
-void citireProdus(Produs &p) {
+void citireProdus(Produs* p) {
 	printf("\nCod produs: ");
-	scanf_s("%d", &p.codDeBare);
+	scanf("%d", &p->codDeBare);
 
 	printf("Denumire produs: ");
 
 	getchar();
-	gets_s(p.denumire, 50);
+	fgets(p->denumire, 50, stdin);
 	//scanf_s("%s", p.denumire, 50);
 
 	printf("Pret produs: ");
-	scanf_s("%f", &p.pret);
+	scanf("%f", &p->pret);
 	printf("Stoc produs: ");
-	scanf_s("%d", &p.stoc);
+	scanf("%d", &p->stoc);
 
 	printf("Data expirare produse -> zi: ");
-	scanf_s("%d", &p.dataExpirare.zi);
+	scanf("%d", &p->dataExpirare.zi);
 	printf("Data expirare produse ->  luna: ");
-	scanf_s("%d", &p.dataExpirare.luna);
+	scanf("%d", &p->dataExpirare.luna);
 	printf("Data expirare produse -> an: ");
-	scanf_s("%d", &p.dataExpirare.an);
+	scanf("%d", &p->dataExpirare.an);
 }
 
 void scriereInFisierBinarInModSecvential(char numeFisier[20]) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "ab");//deschide fisierul in mod de adaugare binara
+	FILE* f = fopen(numeFisier, "ab");//deschide fisierul in mod de adaugare binara
 
 	if (f != NULL) {
 		int continuare = 1;
@@ -134,12 +131,12 @@ void scriereInFisierBinarInModSecvential(char numeFisier[20]) {
 		{
 			Produs p;
 
-			citireProdus(p);
+			citireProdus(&p);
 
 			fwrite(&p, sizeof(Produs), 1, f);
 
 			printf("\nDoriti sa continuati? (1/0) ");
-			scanf_s("%d", &continuare);
+			scanf("%d", &continuare);
 		}
 
 		fclose(f);
@@ -147,8 +144,7 @@ void scriereInFisierBinarInModSecvential(char numeFisier[20]) {
 }
 
 void modificareProdus(char numeFisier[20], int codBare) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "rb+");
+	FILE* f = fopen(numeFisier, "rb+");
 	int nrProduse = getNrProduse(f);
 
 	if (f != NULL)
@@ -190,8 +186,7 @@ void afisareProdus(Produs p) {
 }
 
 void afisareProduseDinFisierBinar(char numeFisier[20]) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "rb");
+	FILE* f = fopen(numeFisier, "rb");
 
 	Produs p;
 	if (f != NULL) {
@@ -208,11 +203,9 @@ void afisareProduseDinFisierBinar(char numeFisier[20]) {
 }
 
 void generareRaport(char numeFisier[20]) {
-	FILE* f;
-	fopen_s(&f, numeFisier, "rb");
+	FILE* f = fopen(numeFisier, "rb");
 
-	FILE* g;
-	fopen_s(&g, "RaportProduse.txt", "w");
+	FILE* g = fopen("RaportProduse.txt", "w");
 
 	Produs p;
 	if (f != NULL) {
@@ -227,14 +220,14 @@ void generareRaport(char numeFisier[20]) {
 	}
 }
 
-void main() {
+int main() {
 	char numeFisier[20];
 	printf("Numele fisierului binar secvential: ");
-	scanf_s("%s", &numeFisier, 20);
+	scanf("%s", numeFisier);
 
 	printf("Vreti sa scrieti ceva in fisierul binar?(0/1)\n");
 	int ok = 0;
-	scanf_s("%d", &ok);
+	scanf("%d", &ok);
 	if (ok == 1) {
 		scriereInFisierBinarInModSecvential(numeFisier);
 	}
@@ -254,4 +247,5 @@ void main() {
 	printf("\n=== generare raport ===\n");
 
 	generareRaport(numeFisier);
+	return 0;
 }
