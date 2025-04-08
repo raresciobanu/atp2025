@@ -6,7 +6,7 @@
 
 struct Proprietar
 {
-	char* nume = NULL; //initializati tot timpul pointerii by default cu NULL
+	char* nume;
 	int varsta;
 };
 
@@ -15,35 +15,35 @@ struct Magazin
 	char denumire[100];
 	double venitLunar;
 	int nrAngajati;
-	char* celMaiVandutProdus = NULL; //initializati tot timpul pointerii by default cu NULL
+	char* celMaiVandutProdus;
 
-	Proprietar proprietar;
+	struct Proprietar proprietar;
 };
 
-void scrieProprietarInConsola(Proprietar p) {
+void scrieProprietarInConsola(struct Proprietar p) {
 	printf("Nume = %s\n", p.nume);
 	printf("Varsta = %d\n", p.varsta);
 }
 
-void scrieProprietarInFisText(FILE* file, Proprietar p) {
+void scrieProprietarInFisText(FILE* file, struct Proprietar p) {
 	fprintf(file, "%s\n", p.nume);
 	fprintf(file, "%d\n", p.varsta);
 }
 
-void citireProprietarDinFisText(FILE* file, Proprietar& p) {
+void citireProprietarDinFisText(FILE* file, struct Proprietar* p) {
 	char aux[100];
 
 	fgets(aux, 100, file);
 
-	if (p.nume != NULL) free(p.nume);//evitare memory leaks
+	if (p->nume != NULL) free(p->nume);//evitare memory leaks
 
-	p.nume = (char*)malloc(strlen(aux) + 1);
-	strcpy(p.nume, aux);
+	p->nume = (char*)malloc(strlen(aux) + 1);
+	strcpy(p->nume, aux);
 
-	fscanf(file, "%d\n", &p.varsta);
+	fscanf(file, "%d\n", &p->varsta);
 }
 
-void scrieMagazinInConsola(Magazin m) {
+void scrieMagazinInConsola(struct Magazin m) {
 	printf("Denumire = %s\n", m.denumire);
 
 	printf("Venit lunar = %.2lf\n", m.venitLunar);
@@ -53,7 +53,7 @@ void scrieMagazinInConsola(Magazin m) {
 	scrieProprietarInConsola(m.proprietar);
 }
 
-void scrieMagazinInFisText(FILE* file, Magazin m) {
+void scrieMagazinInFisText(FILE* file, struct Magazin m) {
 	fprintf(file, "%s\n", m.denumire);
 
 	fprintf(file, "%.2lf\n", m.venitLunar);
@@ -63,28 +63,28 @@ void scrieMagazinInFisText(FILE* file, Magazin m) {
 	scrieProprietarInFisText(file, m.proprietar);
 }
 
-void citireMagazinDinFisText(FILE* file, Magazin& m) {
+void citireMagazinDinFisText(FILE* file, struct Magazin* m) {
 	char aux[100];
 
 	fgets(aux, 100, file);
-	strcpy(m.denumire, aux);
+	strcpy(m->denumire, aux);
 
-	fscanf(file, "%.2lf\n", &m.venitLunar);
+	fscanf(file, "%.2lf\n", &m->venitLunar);
 
-	fscanf(file, "%d\n", &m.nrAngajati);
+	fscanf(file, "%d\n", &m->nrAngajati);
 
 	fgets(aux, 100, file);
 
-	if (m.celMaiVandutProdus != NULL) free(m.celMaiVandutProdus);//evitare memory leaks
+	if (m->celMaiVandutProdus != NULL) free(m->celMaiVandutProdus);//evitare memory leaks
 
-	m.celMaiVandutProdus = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.celMaiVandutProdus, aux);
+	m->celMaiVandutProdus = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->celMaiVandutProdus, aux);
 
-	citireProprietarDinFisText(file, m.proprietar);
+	citireProprietarDinFisText(file, &m->proprietar);
 }
 
 
-void scrieMagazinInFisierBinar(FILE* file, Magazin m) {
+void scrieMagazinInFisierBinar(FILE* file, struct Magazin m) {
 	int dim = strlen(m.denumire) + 1;
 	fwrite(&dim, sizeof(dim), 1, file);
 	fwrite(m.denumire, dim, 1, file);
@@ -105,38 +105,38 @@ void scrieMagazinInFisierBinar(FILE* file, Magazin m) {
 }
 
 
-void citireMagazinDinFisierBinar(FILE* file, Magazin& m) {
+void citireMagazinDinFisierBinar(FILE* file, struct Magazin* m) {
 	int dim = 0;
 	fread(&dim, sizeof(dim), 1, file);
-	fread(m.denumire, dim, 1, file);
+	fread(m->denumire, dim, 1, file);
 
-	fread(&m.venitLunar, sizeof(m.venitLunar), 1, file);
-	fread(&m.nrAngajati, sizeof(m.nrAngajati), 1, file);
+	fread(&m->venitLunar, sizeof(m->venitLunar), 1, file);
+	fread(&m->nrAngajati, sizeof(m->nrAngajati), 1, file);
 
-	if (m.celMaiVandutProdus != NULL) free(m.celMaiVandutProdus);
+	if (m->celMaiVandutProdus != NULL) free(m->celMaiVandutProdus);
 
 	char aux[100];
 
 	fread(&dim, sizeof(dim), 1, file);
 	fread(aux, dim, 1, file);
 
-	m.celMaiVandutProdus = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.celMaiVandutProdus, aux);
+	m->celMaiVandutProdus = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->celMaiVandutProdus, aux);
 
 	//proprietar
-	if (m.proprietar.nume != NULL) free(m.proprietar.nume);
+	if (m->proprietar.nume != NULL) free(m->proprietar.nume);
 
 	fread(&dim, sizeof(dim), 1, file);
 	fread(aux, dim, 1, file);
 
-	m.proprietar.nume = (char*)malloc(strlen(aux) + 1);
-	strcpy(m.proprietar.nume, aux);
+	m->proprietar.nume = (char*)malloc(strlen(aux) + 1);
+	strcpy(m->proprietar.nume, aux);
 
-	fread(&m.proprietar.varsta, sizeof(m.proprietar.varsta), 1, file);
+	fread(&m->proprietar.varsta, sizeof(m->proprietar.varsta), 1, file);
 }
 
-void main() {
-	Proprietar p1, p2;
+int main() {
+	struct Proprietar p1, p2;
 
 	p1.nume = (char*)malloc(strlen("Maria Popescu") + 1);
 	strcpy(p1.nume, "Maria Popescu");
@@ -146,7 +146,7 @@ void main() {
 	strcpy(p2.nume, "Mihai Vasile");
 	p2.varsta = 27;
 
-	Magazin m1, m2;
+	struct Magazin m1, m2;
 
 	strcpy(m1.denumire, "La Cocos");
 	m1.venitLunar = 121122.4545;
@@ -183,9 +183,9 @@ void main() {
 		exit(233);
 	}
 
-	Magazin m3, m4;
-	citireMagazinDinFisText(fisierMagazineIn, m3);
-	citireMagazinDinFisText(fisierMagazineIn, m4);
+	struct Magazin m3, m4;
+	citireMagazinDinFisText(fisierMagazineIn, &m3);
+	citireMagazinDinFisText(fisierMagazineIn, &m4);
 
 
 	fclose(fisierMagazineIn);
@@ -216,9 +216,9 @@ void main() {
 		exit(120);
 	}
 
-	Magazin m5, m6;
-	citireMagazinDinFisierBinar(fisierMagazineBinIn, m5);
-	citireMagazinDinFisierBinar(fisierMagazineBinIn, m6);
+	struct Magazin m5, m6;
+	citireMagazinDinFisierBinar(fisierMagazineBinIn, &m5);
+	citireMagazinDinFisierBinar(fisierMagazineBinIn, &m6);
 
 	fclose(fisierMagazineBinIn);
 

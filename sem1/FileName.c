@@ -1,21 +1,22 @@
 #include<stdio.h> //librarie folosita pt citire si scriere
 #include<stdlib.h> //librarie folosita pentru alocarea/dezalocarea pointerilor
 #include<math.h> //librarie folosita pentru diverse functii matematice
+#include<stdbool.h>
 
 void setareValoare(int x) {
 	x = 100;
 }
 
-void setareValoare2(int &x) {
-	x = 100;
+void setareValoare2(int* x) {
+	*x = 100;
 }
 
-void functieRandom(int& x) {
-	x = 200;
+void functieRandom(int* x) {
+	*x = 200;
 }
 
-void altaFunctieRandom(int& x) {
-	x = 300;
+void altaFunctieRandom(int* x) {
+	*x = 300;
 }
 
 int suma(int x, int y) {
@@ -39,7 +40,7 @@ double ecuatie3(double x) {
 
 void metodaBisectiei(double A, double B, int N,
 	double(*ptr_ecuatie)(double), double epsilon,
-	double& solutie, int& cod) {//se pune "&" pentru ca variabilele cod si solutie se modifica in acest bloc si vrem sa primim valorile modificate si in main()
+	double* solutie, int* cod) {//se pune "&" pentru ca variabilele cod si solutie se modifica in acest bloc si vrem sa primim valorile modificate si in main()
 
 	//A,B - capetele intervalului in care se cauta radacina unica
 
@@ -48,42 +49,42 @@ void metodaBisectiei(double A, double B, int N,
 	//double(*ptr_ecuatie)(double) - pointer la functie -> folosita pentru a transmite mai departe din main() ecuatiile de mai sus (1,2,3)
 	//daca va uitati atent pointerul la functie are acelasi format ca antetul functiilor de mai sus.
 
-	//epsilon - eroarea acceptata - o variabila cat mai mica : 0.00001 
+	//epsilon - eroarea acceptata - o variabila cat mai mica : 0.00001
 
 	//solutie - se va salva in variabila solutie valoarea radacinei
 	//cod - poate fi 0 sau 1 ...-> 1 daca s-a gasit radacina, 0 altfel.
 
-	solutie = cod = 0;
+	*solutie = *cod = 0;
 
-	if (ptr_ecuatie(A) == 0) { solutie = A; cod = 1; return; } //aici se verifica daca partea inferioara a intervalului este radacina ecuatiei
-	if (ptr_ecuatie(B) == 0) { solutie = B; cod = 1; return; } //aici se verifica daca partea superioara a intervalului este radacina ecuatiei
+	if (ptr_ecuatie(A) == 0) { *solutie = A; *cod = 1; return; } //aici se verifica daca partea inferioara a intervalului este radacina ecuatiei
+	if (ptr_ecuatie(B) == 0) { *solutie = B; *cod = 1; return; } //aici se verifica daca partea superioara a intervalului este radacina ecuatiei
 	if (ptr_ecuatie(A) * ptr_ecuatie(B) > 0) {
 		printf("Nu s-a gasit nicio radacina sau s-au gasit prea multe\n"); //aici e clar ce se intampla sper...
 		cod = 0; return;
 	}
 	while (N > 0 && cod == 0) {///se itereaza in maxim N pasi sau pana cand se gaseste radacina
-		solutie = (A + B) / 2; //ne pozitionam la mijlocul intervalului [A,B]
+		*solutie = (A + B) / 2; //ne pozitionam la mijlocul intervalului [A,B]
 
-		if (ptr_ecuatie(solutie) == 0) { //daca valoarea de la mijlocul intervalului [A,B] este radacina atunci am gasit solutia.
-			cod = 1; continue;
+		if (ptr_ecuatie(*solutie) == 0) { //daca valoarea de la mijlocul intervalului [A,B] este radacina atunci am gasit solutia.
+			*cod = 1; continue;
 		}
 
-		if (ptr_ecuatie(A) * ptr_ecuatie(solutie) < 0) {//daca nu s a gasit radacina mai sus atunci trebuie sa cautam alt interval
-			B = solutie;//in cazul asta noul interval de cautare va fi [A,solutie] - (unde solutie era (A+B)/2)
+		if (ptr_ecuatie(A) * ptr_ecuatie(*solutie) < 0) {//daca nu s a gasit radacina mai sus atunci trebuie sa cautam alt interval
+			B = *solutie;//in cazul asta noul interval de cautare va fi [A,solutie] - (unde solutie era (A+B)/2)
 		}
 		else {
-			A = solutie;//in cazul asta noul interval de cautare va fi [solutie, B] - (unde solutie era (A+B)/2)
+			A = *solutie;//in cazul asta noul interval de cautare va fi [solutie, B] - (unde solutie era (A+B)/2)
 		}
 
 		if (B - A <= epsilon) {//se accepta o radacina x in care f(x) sa tinda catre 0......
-			cod = 1;
+			*cod = 1;
 		}
 
 		N--;//se trece la urmatorul pas. daca nu se gaseste solutia in N pasi atunci codul ramane 0;
 	}
 }
 
-void main() {
+int main() {
 	int xx = 1;
 	double ww = 73210932.44; //ctrl-> k + d - pt formatare
 
@@ -122,7 +123,7 @@ void main() {
 	int var1 = 233;
 	setareValoare(var1);
 	printf("var1=%d\n", var1);
-	setareValoare2(var1);
+	setareValoare2(&var1);
 	printf("var1=%d\n", var1);
 
 
@@ -131,7 +132,7 @@ void main() {
 
 	printf("\n\n---pointeri---\n\n");
 	//sa presupunem ca variabila x este salvata la adresa #222
-	int* pointer1 = &x; //adica variabila pointer1 este creata de ex la adresa #11 si are ca valoare #222 
+	int* pointer1 = &x; //adica variabila pointer1 este creata de ex la adresa #11 si are ca valoare #222
 	printf("pointer1=%p\n", pointer1);
 	printf("*pointer1=%d\n", *pointer1);
 
@@ -152,18 +153,18 @@ void main() {
 	//pointeri la functii
 	int uuu = 60;
 
-	void (*pointerLaFunctie)(int&);//poate primi ca input doar fct ce returneaza void si primesc ca input int&
+	void (*pointerLaFunctie)(int*);//poate primi ca input doar fct ce returneaza void si primesc ca input int&
 
 	pointerLaFunctie = functieRandom;
-	pointerLaFunctie(uuu); //e ca si cum ai executa functieRandom(uuu)
+	pointerLaFunctie(&uuu); //e ca si cum ai executa functieRandom(uuu)
 	printf("pointerLaFunctie a executat functieRandom(uuu) si se afiseaza uuu=%d\n", uuu);
 
 	pointerLaFunctie = altaFunctieRandom;
-	pointerLaFunctie(uuu); //e ca si cum ai executa altaFunctieRandom(uuu)
+	pointerLaFunctie(&uuu); //e ca si cum ai executa altaFunctieRandom(uuu)
 	printf("pointerLaFunctie a executat altaFunctieRandom(uuu) si se afiseaza uuu=%d\n", uuu);
 
 	pointerLaFunctie = setareValoare2;
-	pointerLaFunctie(uuu);  //e ca si cum ai executa setareValoare2(uuu)
+	pointerLaFunctie(&uuu);  //e ca si cum ai executa setareValoare2(uuu)
 	printf("pointerLaFunctie a executat setareValoare2(uuu) si se afiseaza uuu=%d\n", uuu);
 
 	printf("\n\n---metoda bisectiei---\n\n");
@@ -171,12 +172,12 @@ void main() {
 	//metoda bisectiei
 	double solutie = 0;
 	int cod = 0;
-	metodaBisectiei(-2, 12, 1000, ecuatie1, 0.0001, solutie, cod);
+	metodaBisectiei(-2, 12, 1000, ecuatie1, 0.0001, &solutie, &cod);
 	printf("ecuatie 1: cod=%d, solutie=%.2lf\n", cod, solutie);
 
-	metodaBisectiei(-2, 12, 1000, ecuatie2, 0.0001, solutie, cod);
+	metodaBisectiei(-2, 12, 1000, ecuatie2, 0.0001, &solutie, &cod);
 	printf("ecuatie 2: cod=%d, solutie=%.2lf\n", cod, solutie);
 
-	metodaBisectiei(-2, 12, 1000, ecuatie3, 0.0001, solutie, cod);
+	metodaBisectiei(-2, 12, 1000, ecuatie3, 0.0001, &solutie, &cod);
 	printf("ecuatie 3: cod=%d, solutie=%.2lf\n", cod, solutie);
 }

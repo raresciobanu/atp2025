@@ -1,17 +1,16 @@
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
 
 #pragma warning (disable:4996)
 
-struct data {
+typedef struct {
 	int zi;
 	int luna;
 	int an;
-};
+} data;
 
 //fisier binar relativ
-struct angajat {
+typedef struct {
 	int is; //is daca exista angajatul
 	int cod; //is si cod reprezinta informatiile vitale la folosirea fis. binare relative
 
@@ -23,7 +22,7 @@ struct angajat {
 	float sal[3];
 
 	data data_ang;
-};
+} angajat;
 
 int nr_art(FILE* f)
 {
@@ -61,19 +60,19 @@ angajat createEmptyAngajat() {
 	return a;
 }
 
-void citireAng(angajat& a) {
-	printf("nume="); getc(stdin); gets_s(a.nume);
-	printf("prenume="); gets_s(a.prenume);
-	printf("dep="); gets_s(a.dep);
-	printf("prof="); gets_s(a.prof);
-	printf("varsta="); scanf_s("%d", &a.varsta);
+void citireAng(angajat* a) {
+	printf("nume="); getc(stdin); fgets(a->nume, 50, stdin);
+	printf("prenume="); fgets(a->prenume, 50, stdin);
+	printf("dep="); fgets(a->dep, 50, stdin);
+	printf("prof="); fgets(a->prof, 50, stdin);
+	printf("varsta="); scanf("%d", &a->varsta);
 	for (int i = 0; i < 3; i++)
 	{
 		printf("sal din luna %d: ", i + 1);
-		scanf_s("%f", &a.sal[i]);
+		scanf("%f", &a->sal[i]);
 	}
 	printf("data angajarii zi, luna si an:  ");//03 05 2019
-	scanf("%d %d %d", &a.data_ang.zi, &a.data_ang.luna, &a.data_ang.an);
+	scanf("%d %d %d", &a->data_ang.zi, &a->data_ang.luna, &a->data_ang.an);
 }
 
 void populare()
@@ -82,14 +81,14 @@ void populare()
 
 	angajat a = createEmptyAngajat();
 
-	int cod, i, er;
+	int cod, i;
 	char nume_f[20];
 
 	printf("\nnume fisier:");
-	gets_s(nume_f);
+	fgets(nume_f, 20, stdin);
 	f = fopen(nume_f, "wb+");
 
-	printf("cod="); scanf_s("%d", &cod);//reprezinta codul
+	printf("cod="); scanf("%d", &cod);//reprezinta codul
 	while (!feof(stdin))//<----sfarsitul introducerii fiind marcat standard - se citeste pana cand introduceti CTRL+Z
 	{
 		if (cod < 0) {
@@ -97,7 +96,7 @@ void populare()
 		}
 
 		//aici cod >= 0
-		if (cod >= nr_art(f)) /// A1 A2 A3 A4 ..........A300 
+		if (cod >= nr_art(f)) /// A1 A2 A3 A4 ..........A300
 		{
 			fseek(f, 0, SEEK_END);
 
@@ -107,7 +106,7 @@ void populare()
 			a.is = 1;
 			a.cod = cod;
 
-			citireAng(a);
+			citireAng(&a);
 
 			fseek(f, cod * sizeof(angajat), SEEK_SET);
 			fwrite(&a, sizeof(angajat), 1, f);
@@ -120,14 +119,14 @@ void populare()
 				a.is = 1;
 				a.cod = cod;
 
-				citireAng(a);
+				citireAng(&a);
 
 				fseek(f, cod * sizeof(angajat), SEEK_SET);
 				fwrite(&a, sizeof(angajat), 1, f);
 			}
 			else printf("inreg. exista\n");
 		}
-		printf("\ncod="); scanf_s("%d", &cod);
+		printf("\ncod="); scanf("%d", &cod);
 	}
 	fclose(f);
 }
@@ -139,7 +138,7 @@ void afisare()
 
 	char nume_f[20];
 	printf("\nnume fisier:");
-	gets_s(nume_f);
+	fgets(nume_f, 20, stdin);
 
 	if (!(f = fopen(nume_f, "rb"))) printf("nu exista fisierul");
 	else {
@@ -178,7 +177,7 @@ void afisare_poz()
 	int n;
 	char nume_f[20];
 	printf("\nnume fisier:");
-	gets_s(nume_f);
+	fgets(nume_f, 20, stdin);
 	if (!(f = fopen(nume_f, "rb"))) printf("nu exista fisierul");
 	else {
 		printf("\nafisarea inregistrarilor a caror pozitie o citesc de la tastatura");
@@ -218,7 +217,7 @@ void afisare_peBazaAnului()
 	int an;
 	char nume_f[20];
 	printf("\nnume fisier:");
-	gets_s(nume_f);
+	fgets(nume_f, 20, stdin);
 	if (!(f = fopen(nume_f, "rb"))) printf("nu exista fisierul");
 	else {
 		printf("\nafisarea inregistrarilor pe baza anului");
@@ -248,12 +247,12 @@ void afisare_peBazaAnului()
 	}
 }
 
-void main() {
+int main() {
 	//#define SEEK_CUR    1
 	//#define SEEK_END    2
 	//#define SEEK_SET    0
 
-	printf("\n\POPULARE FISIER BINAR\n\n");
+	printf("\n\nPOPULARE FISIER BINAR\n\n");
 	populare();
 
 
@@ -263,6 +262,6 @@ void main() {
 
 	//printf("\n\AFISARE DIN FISIER BINAR PE BAZA CODULUI\n\n");
 	//afisare_poz();
-	printf("\n\AFISARE DIN FISIER BINAR PE BAZA ANULUI\n\n");
+	printf("\n\nAFISARE DIN FISIER BINAR PE BAZA ANULUI\n\n");
 	afisare_peBazaAnului();
 }
