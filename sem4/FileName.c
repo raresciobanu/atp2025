@@ -1,4 +1,4 @@
-//rewind(f) -> te repozitionezi la inceputul fisierului. 
+//rewind(f) -> te repozitionezi la inceputul fisierului.
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -15,7 +15,7 @@ struct Animal {
 	int esteSetat;//val 0/1 - pentru a indica daca o locatie din fisier este ocupata de un animal
 };
 
-void afisareAnimal(Animal a) {
+void afisareAnimal(struct Animal a) {
 	printf("\n======\n");
 	printf("key = % d\n", a.key);
 	printf("denumire = %s\n", a.denumire);
@@ -26,12 +26,12 @@ void afisareAnimal(Animal a) {
 	printf("======\n");
 }
 
-void citireAnimal(Animal& a) {
-	printf("denumire = ");  getchar();  gets_s(a.denumire);
-	printf("varsta = "); scanf("%d", &a.varsta);
-	printf("greutate = "); scanf("%lf", &a.greutate);
-	printf("culoare = "); scanf("%s", a.culoare);
-	a.esteSetat = 1;
+void citireAnimal(struct Animal* a) {
+	printf("denumire = ");  getchar();  fgets(a->denumire, 99, stdin);
+	printf("varsta = "); scanf("%d", &a->varsta);
+	printf("greutate = "); scanf("%lf", &a->greutate);
+	printf("culoare = "); scanf("%s", a->culoare);
+	a->esteSetat = 1;
 }
 
 int aflaCateAnimaleSuntInFiser(FILE* f) {
@@ -40,15 +40,15 @@ int aflaCateAnimaleSuntInFiser(FILE* f) {
 
 	fseek(f, 0, SEEK_END);//se pozitioneaza la sf fisierului
 
-	int nrAnimale = ftell(f) / sizeof(Animal); //daca tu ai 4 animale in fisier=> ftell va fi 560  => 560/140 = 4 animale
+	int nrAnimale = ftell(f) / sizeof(struct Animal); //daca tu ai 4 animale in fisier=> ftell va fi 560  => 560/140 = 4 animale
 
 	fseek(f, pozCurenta, SEEK_SET);//se pozitioneaza la pozitia initiala
 
 	return nrAnimale;
 }
 
-Animal createEmptyAnimal() {
-	Animal a;
+struct Animal createEmptyAnimal() {
+	struct Animal a;
 	strcpy(a.culoare, "culoareEmpty");
 	strcpy(a.denumire, "denumireEmpty");
 	a.varsta = 0;
@@ -58,7 +58,8 @@ Animal createEmptyAnimal() {
 
 	return a;
 }
-void main() {
+
+int main() {
 	//Afisarea informatiilor in format tabel
 
 	//FILE *f = fopen("ceva.txt", "w");
@@ -77,7 +78,7 @@ void main() {
 	//offset - numarul de bytes fata de origin(al 3 lea parametru);
 	//poate fi nr. pozitiv(pt mersul inainte prin fisier) sau negativ(pt mersul inapoi prin fisier);
 
-	//origin - originea punctului fata de care se aplica offsetul; 
+	//origin - originea punctului fata de care se aplica offsetul;
 	//Ex: SEEK_SET - inceputul fisierului
 	//Ex: SEEK_CUR - pozitia curenta a fisierului
 	//Ex: SEEK_END - sfarsitul fisierului
@@ -112,7 +113,7 @@ void main() {
 			int nrAnimale = aflaCateAnimaleSuntInFiser(fisBinar);
 
 			if (key >= 0) {
-				Animal x = createEmptyAnimal();
+				struct Animal x = createEmptyAnimal();
 
 				if (key >= nrAnimale) {
 					//alocam memorie noua daca cheia introdusa > nr de animale din fisier
@@ -123,30 +124,30 @@ void main() {
 
 
 					for (int i = 0; i < (key + 1) - nrAnimale; i++) {
-						fwrite(&x, sizeof(Animal), 1, fisBinar);
+						fwrite(&x, sizeof(struct Animal), 1, fisBinar);
 					}
 
 					//sau in loc de for(le scrii pe toate odata): fwrite(&x, sizeof(Animal), (key + 1) - nrAnimale, fisBinar);
 				}
 
 				//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-				fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+				fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 				//se citeste animalul de la adreasa: key * sizeof(Animal)
-				fread(&x, sizeof(Animal), 1, fisBinar);
+				fread(&x, sizeof(struct Animal), 1, fisBinar);
 
 				if (x.esteSetat == 1) {
 					printf("La cheia introdusa exista deja un animal salvat. Nu se mai poate adauga unul.\n");
 				}
 				else {
 					x.key = key;
-					citireAnimal(x);
+					citireAnimal(&x);
 
 					//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-					fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+					fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 					//se scrie Animalul in fisier la adresa key * sizeof(Animal)
-					fwrite(&x, sizeof(Animal), 1, fisBinar);
+					fwrite(&x, sizeof(struct Animal), 1, fisBinar);
 
 				}
 			}
@@ -154,45 +155,45 @@ void main() {
 			break;
 		}
 		case 2: {
-			Animal x = createEmptyAnimal();
+			struct Animal x = createEmptyAnimal();
 
 			int key;
 			printf("Key: "); scanf("%d", &key);
 
 			//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-			fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+			fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 			//se citeste animalul de la adreasa: key * sizeof(Animal)
-			fread(&x, sizeof(Animal), 1, fisBinar);
+			fread(&x, sizeof(struct Animal), 1, fisBinar);
 
 			if (x.esteSetat == 0) {
 				printf("La cheia introdusa nu exista niciun animal. NU se poate modifica nimic.\n");
 			}
 			else {
-				citireAnimal(x);
+				citireAnimal(&x);
 
 				//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-				fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+				fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 				//se scrie Animalul in fisier la adresa key * sizeof(Animal)
-				fwrite(&x, sizeof(Animal), 1, fisBinar);
+				fwrite(&x, sizeof(struct Animal), 1, fisBinar);
 
 			}
 
 			break;
 		}
 		case 3: {
-			Animal x = createEmptyAnimal();
+			struct Animal x = createEmptyAnimal();
 
 			int key;
 			printf("Key: "); scanf("%d", &key);
 
 
 			//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-			fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+			fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 			//se citeste animalul de la adreasa: key * sizeof(Animal)
-			fread(&x, sizeof(Animal), 1, fisBinar);
+			fread(&x, sizeof(struct Animal), 1, fisBinar);
 
 			if (x.esteSetat == 0) {
 				printf("La cheia introdusa nu exista niciun animal. NU se poate sterge nimic.\n");
@@ -201,10 +202,10 @@ void main() {
 				x.esteSetat = 0;
 
 				//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-				fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+				fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 				//se scrie Animalul in fisier la adresa key * sizeof(Animal)
-				fwrite(&x, sizeof(Animal), 1, fisBinar);
+				fwrite(&x, sizeof(struct Animal), 1, fisBinar);
 
 				printf("S-a sters animalul de la cheia: %d\n", key);
 			}
@@ -212,16 +213,16 @@ void main() {
 			break;
 		}
 		case 4: {
-			Animal x = createEmptyAnimal();
+			struct Animal x = createEmptyAnimal();
 
 			int key;
 			printf("Key: "); scanf("%d", &key);
 
 			//se pozitioneaza cursorul la adresa key * sizeof(Animal)
-			fseek(fisBinar, key * sizeof(Animal), SEEK_SET);
+			fseek(fisBinar, key * sizeof(struct Animal), SEEK_SET);
 
 			//se citeste animalul de la adreasa: key * sizeof(Animal)
-			fread(&x, sizeof(Animal), 1, fisBinar);
+			fread(&x, sizeof(struct Animal), 1, fisBinar);
 
 			if (x.esteSetat == 0) {
 				printf("La cheia introdusa nu exista niciun animal. NU se poate afisa nimic.\n");
